@@ -33,7 +33,8 @@ server.post('/api/messages', connector.listen());
 
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector, function (session) {
-    if (session.message.text == 'signout') {
+    signOutPhrases = ['signout', 'sign out', 'logout', 'log out'];
+    if (signOutPhrases.indexOf(session.message.text) > -1) {
         // It is important to have a SignOut intent
         connector.signOutUser(session.message.address, connectionName,  (err, result) => {
             if (!err) {
@@ -52,8 +53,6 @@ var bot = new builder.UniversalBot(connector, function (session) {
                 // If there not is already a token, the bot can send an OAuthCard to have the user log in
                 if (!session.userData.activeSignIn) {
                     session.send("Hello! Let's get you signed in!");
-                    console.log(connector);
-                    console.log(connectionName);
                     builder.OAuthCard.create(connector, session, connectionName, "Please sign in", "Sign in", (createSignInErr, signInMessage) =>
                     {
                         if (signInMessage) {
