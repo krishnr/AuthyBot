@@ -40,6 +40,15 @@ var bot = new builder.UniversalBot(connector, function (session) {
         connector.signOutUser(session.message.address, connectionName,  (err, result) => {
             if (!err) {
                 session.send('You are signed out.');
+                session.userData.activeSignIn = false;
+            } else {
+                session.send('There was a problem signing you out.');                
+            }
+        });
+        connector.signOutUser(session.message.address, spotifyConnection,  (err, result) => {
+            if (!err) {
+                session.send('You are signed out.');
+                session.userData.activeSignIn = false;
             } else {
                 session.send('There was a problem signing you out.');                
             }
@@ -64,7 +73,8 @@ var bot = new builder.UniversalBot(connector, function (session) {
                             session.send("Something went wrong trying to sign you in.");
                         }     
                     });
-                } else {
+                } 
+                else {
                     // Some clients require a 6 digit code validation so we can check that here
                     session.send("Let's see if that code works...");
                     connector.getUserToken(session.message.address, spotifyConnection, session.message.text, (err2, tokenResponse) => {
@@ -98,7 +108,8 @@ var bot = new builder.UniversalBot(connector, function (session) {
                             session.send("Something went wrong trying to sign you in.");
                         }     
                     });
-                } else {
+                } 
+                else {
                     // Some clients require a 6 digit code validation so we can check that here
                     session.send("Let's see if that code works...");
                     connector.getUserToken(session.message.address, connectionName, session.message.text, (err2, tokenResponse) => {
