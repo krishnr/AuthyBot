@@ -27,6 +27,7 @@ var connector = new builder.ChatConnector({
 });
 
 var connectionName = process.env.CONNECTION_NAME;
+var spotifyConnection = process.env.SPOTIFY_CONNECTION;
 
 // Listen for messages from users
 server.post('/api/messages', connector.listen());
@@ -43,7 +44,42 @@ var bot = new builder.UniversalBot(connector, function (session) {
                 session.send('There was a problem signing you out.');                
             }
         });
-    } else {
+    } 
+    else if (session.message.text == 'spotify') {
+        // First check whether the Azure Bot Service already has a token for this user
+        connector.getUserToken(session.message.address, spotifyConnection, undefined, (err, result) => {
+            if (result) {
+                // If there is already a token, the bot can use it directly
+                session.send('You are already signed into Spotify with token: ' + result.token);
+            } else {
+                // If there not is already a token, the bot can send an OAuthCard to have the user log in
+                if (!session.userData.activeSignIn) {
+                    session.send("Hello! Let's get you signed into Spotify!");
+                    builder.OAuthCard.create(connector, session, spotifyConnection, "Please sign in", "Sign in", (createSignInErr, signInMessage) =>
+                    {
+                        if (signInMessage) {
+                            session.send(signInMessage);
+                            session.userData.activeSignIn = true;
+                        } else {
+                            session.send("Something went wrong trying to sign you in.");
+                        }     
+                    });
+                } else {
+                    // Some clients require a 6 digit code validation so we can check that here
+                    session.send("Let's see if that code works...");
+                    connector.getUserToken(session.message.address, spotifyConnection, session.message.text, (err2, tokenResponse) => {
+                        if (tokenResponse) {
+                            session.send('It worked! You are now signed in with token: ' + tokenResponse.token);
+                            session.userData.activeSignIn = false;
+                        } else {
+                            session.send("Hmm, that code wasn't right");
+                        }
+                    });
+                }
+            }
+        });
+    } 
+    else {
         // First check whether the Azure Bot Service already has a token for this user
         connector.getUserToken(session.message.address, connectionName, undefined, (err, result) => {
             if (result) {
