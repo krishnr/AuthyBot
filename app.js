@@ -39,18 +39,18 @@ var bot = new builder.UniversalBot(connector, function (session) {
         // It is important to have a SignOut intent
         connector.signOutUser(session.message.address, connectionName,  (err, result) => {
             if (!err) {
-                session.send('You are signed out.');
+                session.say('You are signed out.', 'You are signed out.');
                 session.userData.activeSignIn = false;
             } else {
-                session.send('There was a problem signing you out.');                
+                session.say('There was a problem signing you out.', 'There was a problem signing you out.');                
             }
         });
         connector.signOutUser(session.message.address, spotifyConnection,  (err, result) => {
             if (!err) {
-                session.send('You are signed out.');
+                session.say('You are signed out.', 'You are signed out.');
                 session.userData.activeSignIn = false;
             } else {
-                session.send('There was a problem signing you out.');                
+                session.say('There was a problem signing you out.', 'There was a problem signing you out.');                
             }
         });
     } 
@@ -59,30 +59,30 @@ var bot = new builder.UniversalBot(connector, function (session) {
         connector.getUserToken(session.message.address, spotifyConnection, undefined, (err, result) => {
             if (result) {
                 // If there is already a token, the bot can use it directly
-                session.send('You are already signed into Spotify with token: ' + result.token);
+                session.say('You are already signed into Spotify with token: ' + result.token, 'You are already signed into Spotify with token: ' + result.token);
             } else {
                 // If there not is already a token, the bot can send an OAuthCard to have the user log in
                 if (!session.userData.activeSignIn) {
-                    session.send("Hello! Let's get you signed into Spotify!");
+                    session.say("Hello! Let's get you signed into Spotify!", "Hello! Let's get you signed into Spotify!");
                     builder.OAuthCard.create(connector, session, spotifyConnection, "Please sign in", "Sign in", (createSignInErr, signInMessage) =>
                     {
                         if (signInMessage) {
                             session.send(signInMessage);
                             session.userData.activeSignIn = true;
                         } else {
-                            session.send("Something went wrong trying to sign you in.");
+                            session.say("Something went wrong trying to sign you in.", "Something went wrong trying to sign you in.");
                         }     
                     });
                 } 
                 else {
                     // Some clients require a 6 digit code validation so we can check that here
-                    session.send("Let's see if that code works...");
+                    session.say("Let's see if that code works...", "Let's see if that code works...");
                     connector.getUserToken(session.message.address, spotifyConnection, session.message.text, (err2, tokenResponse) => {
                         if (tokenResponse) {
-                            session.send('It worked! You are now signed in with token: ' + tokenResponse.token);
+                            session.say('It worked! You are now signed in with token: ' + tokenResponse.token, 'It worked! You are now signed in with token: ' + tokenResponse.token);
                             session.userData.activeSignIn = false;
                         } else {
-                            session.send("Hmm, that code wasn't right");
+                            session.say("Hmm, that code wasn't right", "Hmm, that code wasn't right");
                         }
                     });
                 }
@@ -94,30 +94,30 @@ var bot = new builder.UniversalBot(connector, function (session) {
         connector.getUserToken(session.message.address, connectionName, undefined, (err, result) => {
             if (result) {
                 // If there is already a token, the bot can use it directly
-                session.send('You are already signed in with token: ' + result.token);
+                session.say('You are already signed in with token: ' + result.token, 'You are already signed in with token: ' + result.token);
             } else {
                 // If there not is already a token, the bot can send an OAuthCard to have the user log in
                 if (!session.userData.activeSignIn) {
-                    session.send("Hello! Let's get you signed in!");
+                    session.say("Hello! Let's get you signed in!", "Hello! Let's get you signed in!");
                     builder.OAuthCard.create(connector, session, connectionName, "Please sign in", "Sign in", (createSignInErr, signInMessage) =>
                     {
                         if (signInMessage) {
-                            session.send(signInMessage);
+                            session.send(signInMessage)
                             session.userData.activeSignIn = true;
                         } else {
-                            session.send("Something went wrong trying to sign you in.");
+                            session.say("Something went wrong trying to sign you in.", "Something went wrong trying to sign you in.");
                         }     
                     });
                 } 
                 else {
                     // Some clients require a 6 digit code validation so we can check that here
-                    session.send("Let's see if that code works...");
+                    // session.say("Let's see if that code works...", "Let's see if that code works...");
                     connector.getUserToken(session.message.address, connectionName, session.message.text, (err2, tokenResponse) => {
                         if (tokenResponse) {
-                            session.send('It worked! You are now signed in with token: ' + tokenResponse.token);
+                            session.say('It worked! You are now signed in with token: ' + tokenResponse.token, 'It worked! You are now signed in with token: ' + tokenResponse.token);
                             session.userData.activeSignIn = false;
                         } else {
-                            session.send("Hmm, that code wasn't right");
+                            session.say("Hmm, that code wasn't right", "Hmm, that code wasn't right");
                         }
                     });
                 }
@@ -131,7 +131,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
         // received a TokenResponse, which is how the Azure Bot Service responds with the user token after an OAuthCard
         bot.loadSession(event.address, (err, session) => {
             let tokenResponse = event.value;
-            session.send('You are now signed in with token: ' + tokenResponse.token);
+            session.say('You are now signed in with token: ' + tokenResponse.token, 'You are now signed in with token: ' + tokenResponse.token);
             session.userData.activeSignIn = false;
         });
     }
@@ -144,7 +144,7 @@ connector.onInvoke((event, cb) => {
             let verificationCode = event.value.state;
             // Get the user token using the verification code sent by MS Teams
             connector.getUserToken(session.message.address, connectionName, verificationCode, (err, result) => {
-                session.send('You are now signed in with token: ' + result.token);
+                session.say('You are now signed in with token: ' + result.token, 'You are now signed in with token: ' + result.token);
                 session.userData.activeSignIn = false;
                 cb(undefined, {}, 200);
             });
